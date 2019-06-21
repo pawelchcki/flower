@@ -1,0 +1,4 @@
+http://dd-newcfg/
+http://dd-28/
+http://dd-26/
+http://dd-25/

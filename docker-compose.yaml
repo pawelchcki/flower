@@ -1,0 +1,44 @@
+version: '3.7'
+services:
+  siege:
+    image: yokogawa/siege
+    command: -c 30 -r 10000 -b -f /tmp/data/hosts.txt
+    volumes:
+      - .:/tmp/data
+
+  dd-newcfg:
+    image: dd:0.28.0-newcfg
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        DD_APM_URL: https://42320-119990860-gh.circle-artifacts.com/0/datadog-php-tracer_0.28.0_noarch.apk
+    ports:
+      - 8889:80      
+  dd-28:
+    image: dd:0.28.0
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        DD_APM_VERSION: 0.28.0
+    ports:
+      - 8888:80
+  dd-26:
+    image: dd:0.26.0
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        DD_APM_VERSION: 0.26.0
+    ports:
+      - 8887:80
+  dd-25:
+    image: dd:0.25.0
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        DD_APM_VERSION: 0.25.0
+    ports:
+      - 8886:80
