@@ -1,38 +1,59 @@
 version: '3.7'
 services:
+  loadtest:
+    image: datadog/docker-library:dd_trace_loadtest_real_world_app
+    command: loadtest -c 20 --rps 400 http://haproxy:5000/
+    depends_on:
+      - haproxy
+  haproxy:
+    image: eeacms/haproxy    
+    depends_on:
+      - dd-newcfg  
+      - dd-28
+      - dd-25
+    environment:
+      - BACKENDS=dd-newcfg dd-28 dd-25
+      - STATS_PORT=1936
+      - HTTPCHK=GET /
+    ports:
+      - 5001:5000
+      - 5002:1936
+
   siege:
     image: yokogawa/siege
-    command: -c 30 -r 10000 -b -f /tmp/data/hosts.txt
+    command: -c 30 -r 100000 -b -f /tmp/data/hosts.txt
     volumes:
       - .:/tmp/data
+    depends_on:
+      - dd-newcfg  
+      - dd-28
+      - dd-25
 
   dd-newcfg:
-    image: dd:0.28.0-newcfg
+    image: dd:0.28.1-wip
     build:
       context: ./
       dockerfile: Dockerfile
       args:
-        DD_APM_URL: https://42320-119990860-gh.circle-artifacts.com/0/datadog-php-tracer_0.28.0_noarch.apk
-    ports:
-      - 8889:80      
+        DD_APM_URL: https://42894-119990860-gh.circle-artifacts.com/0/datadog-php-tracer_0.28.1_noarch.apk
+    
   dd-28:
-    image: dd:0.28.0
+    image: dd:0.28.1
     build:
       context: ./
       dockerfile: Dockerfile
       args:
-        DD_APM_VERSION: 0.28.0
-    ports:
-      - 8888:80
-  dd-26:
-    image: dd:0.26.0
-    build: 
-      context: ./
-      dockerfile: Dockerfile
-      args:
-        DD_APM_VERSION: 0.26.0
-    ports:
-      - 8887:80
+        DD_APM_VERSION: 0.28.1
+
+  # 
+  # dd-26:
+  #   image: dd:0.26.0
+  #   build: 
+  #     context: ./
+  #     dockerfile: Dockerfile
+  #     args:
+  #       DD_APM_VERSION: 0.26.0
+
   dd-25:
     image: dd:0.25.0
     build: 
@@ -40,5 +61,3 @@ services:
       dockerfile: Dockerfile
       args:
         DD_APM_VERSION: 0.25.0
-    ports:
-      - 8886:80

@@ -1,5 +1,5 @@
 FROM alpine:3.9
-RUN apk --no-cache upgrade && apk --no-cache add curl php7-opcache php7-apache2
+RUN apk --no-cache upgrade && apk --no-cache add curl php7-opcache php7-apache2 valgrind
 COPY app.conf /etc/apache2/conf.d/app.conf
 COPY index.php /app/index.php
 ARG DD_APM_VERSION=0.28.0
